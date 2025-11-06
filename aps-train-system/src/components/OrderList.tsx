@@ -38,15 +38,13 @@ export const OrderList: React.FC<OrderListProps> = ({
 
   const getStatusColor = (order: ProductionOrder): string => {
     if (order.status === 'completed') return 'text-green-600';
-    if (isLate(order)) return 'text-red-600';
-    return 'text-blue-600';
+    if (isLate(order)) return 'text-metro-red';
+    return 'text-metro-blue';
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-bold mb-4">Production Orders</h2>
-
-      <div className="space-y-2">
+    <div>
+      <div className="space-y-3">
         {orders.map((order) => {
           const model = getModelInfo(order.modelType);
           const completionDate = completionDates.get(order.id);
@@ -54,68 +52,82 @@ export const OrderList: React.FC<OrderListProps> = ({
           return (
             <div
               key={order.id}
-              className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="border-2 border-gray-200 rounded-lg p-3 hover:bg-gray-50 hover:border-metro-blue cursor-pointer transition-all shadow-sm hover:shadow-md"
               onClick={() => onOrderClick && onOrderClick(order)}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  {/* Order header */}
-                  <div className="flex items-center gap-2 mb-1">
+                  {/* Encabezado de orden */}
+                  <div className="flex items-center gap-2 mb-2">
                     <span
-                      className={`text-xl font-bold ${getStatusColor(order)}`}
+                      className={`text-2xl font-bold ${getStatusColor(order)}`}
                     >
                       {getStatusIcon(order)}
                     </span>
-                    <span className="font-bold text-lg">{order.id}</span>
+                    <span className="font-bold text-lg text-gray-800">{order.id}</span>
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-4 h-4 rounded-full border-2 border-white shadow-md"
                       style={{ backgroundColor: model?.color }}
                     ></div>
                   </div>
 
-                  {/* Model info */}
-                  <div className="text-sm text-gray-600 mb-1">
-                    Model {order.modelType} - {model?.description}
+                  {/* Información del modelo */}
+                  <div className="text-sm text-gray-700 mb-2 font-semibold">
+                    Modelo {order.modelType} - {model?.description}
                   </div>
 
-                  {/* Dates */}
-                  <div className="text-xs text-gray-500">
-                    <div>
-                      Due: {new Date(order.dueDate).toLocaleDateString('es-ES')}
+                  {/* Fechas */}
+                  <div className="text-xs space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 font-semibold">Entrega:</span>
+                      <span className="text-metro-blue font-bold">
+                        {new Date(order.dueDate).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </div>
                     {completionDate && (
-                      <div className={isLate(order) ? 'text-red-600 font-semibold' : ''}>
-                        Est. completion: {new Date(completionDate).toLocaleDateString('es-ES')}
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600 font-semibold">Finalización:</span>
+                        <span className={isLate(order) ? 'text-metro-red font-bold' : 'text-green-600 font-bold'}>
+                          {new Date(completionDate).toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Status badge */}
-                  <div className="mt-2">
+                  {/* Badge de estado */}
+                  <div className="mt-3">
                     <span
-                      className={`text-xs px-2 py-1 rounded ${
+                      className={`text-xs font-bold px-3 py-1 rounded-full ${
                         isLate(order)
-                          ? 'bg-red-100 text-red-700'
+                          ? 'bg-red-100 text-metro-red'
                           : 'bg-green-100 text-green-700'
                       }`}
                     >
-                      {isLate(order) ? 'Late Delivery' : 'On Time'}
+                      {isLate(order) ? '⚠ Entrega Tardía' : '✓ A Tiempo'}
                     </span>
                   </div>
                 </div>
 
-                {/* Delete button */}
+                {/* Botón eliminar */}
                 {onDeleteOrder && (
                   <button
-                    className="text-gray-400 hover:text-red-600 transition-colors"
+                    className="text-gray-400 hover:text-metro-red transition-colors p-1"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDeleteOrder(order.id);
                     }}
-                    title="Delete order"
+                    title="Eliminar orden"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-6 h-6"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -136,8 +148,10 @@ export const OrderList: React.FC<OrderListProps> = ({
       </div>
 
       {orders.length === 0 && (
-        <div className="text-center text-gray-500 py-8">
-          No orders yet. Add an order to start scheduling.
+        <div className="text-center text-gray-500 py-12">
+          <div className="text-6xl mb-4">📋</div>
+          <p className="font-semibold">No hay órdenes todavía</p>
+          <p className="text-sm mt-2">Añade una orden para comenzar la programación.</p>
         </div>
       )}
     </div>
