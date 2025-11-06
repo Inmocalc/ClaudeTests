@@ -95,6 +95,128 @@ npm run preview
 - `npm run preview` - Previsualiza build de producción
 - `npm run lint` - Ejecuta linter de código
 
+## 🐳 Despliegue con Docker
+
+### Opción 1: Docker Compose (Recomendado)
+
+```bash
+# Clonar repositorio
+git clone <repository-url>
+cd aps-train-system
+
+# Construir y ejecutar con Docker Compose
+docker-compose up -d
+
+# La aplicación estará disponible en http://localhost:3000
+```
+
+### Opción 2: Docker Manual
+
+```bash
+# Construir imagen
+docker build -t aps-train-system:latest .
+
+# Ejecutar contenedor
+docker run -d -p 3000:80 --name aps-train-system aps-train-system:latest
+
+# Ver logs
+docker logs -f aps-train-system
+
+# Detener contenedor
+docker stop aps-train-system
+
+# Eliminar contenedor
+docker rm aps-train-system
+```
+
+### Health Check
+
+El contenedor incluye un endpoint de health check en `/health` que puede usarse para monitoreo:
+
+```bash
+curl http://localhost:3000/health
+# Respuesta: healthy
+```
+
+## 🚀 Despliegue en Easypanel
+
+### Método 1: Desde GitHub (Recomendado)
+
+1. **Acceder a Easypanel**
+   - Inicia sesión en tu instancia de Easypanel
+
+2. **Crear Nueva Aplicación**
+   - Click en "Create" → "App"
+   - Selecciona "GitHub" como fuente
+
+3. **Configurar Repositorio**
+   - Repository: `Inmocalc/ClaudeTests`
+   - Branch: `claude/aps-train-scheduling-system-011CUrE6p4Vy7S5Yx9NugbPL`
+   - Build Path: `/aps-train-system`
+
+4. **Configurar Build**
+   - Build Method: `Dockerfile`
+   - Dockerfile Path: `Dockerfile`
+   - Port: `80`
+
+5. **Configurar Dominio**
+   - Agrega tu dominio personalizado o usa el subdominio proporcionado
+   - Ejemplo: `aps-train.tudominio.com`
+
+6. **Deploy**
+   - Click en "Deploy"
+   - Espera a que el build termine (2-3 minutos)
+
+### Método 2: Desde Docker Hub
+
+Si prefieres usar una imagen pre-construida:
+
+```bash
+# En tu servidor, construye la imagen
+cd aps-train-system
+docker build -t tu-usuario/aps-train-system:latest .
+docker push tu-usuario/aps-train-system:latest
+```
+
+Luego en Easypanel:
+1. Crear App → Docker Image
+2. Image: `tu-usuario/aps-train-system:latest`
+3. Port: `80`
+4. Deploy
+
+### Configuración de Recursos Recomendada
+
+- **CPU**: 0.5 cores
+- **Memoria**: 512 MB (mínimo 256 MB)
+- **Storage**: 1 GB
+
+### Variables de Entorno (Opcional)
+
+No se requieren variables de entorno para el funcionamiento básico. La aplicación es completamente estática.
+
+### SSL/HTTPS
+
+Easypanel configura automáticamente SSL con Let's Encrypt. Solo necesitas:
+1. Configurar tu dominio apuntando a tu VPS
+2. Agregar el dominio en Easypanel
+3. Habilitar "Auto SSL"
+
+### Troubleshooting
+
+**Problema: La aplicación no inicia**
+```bash
+# Verificar logs en Easypanel o vía SSH
+docker logs <container-name>
+```
+
+**Problema: Error 502 Bad Gateway**
+- Verifica que el puerto 80 esté expuesto correctamente
+- Revisa que el contenedor esté corriendo: `docker ps`
+
+**Problema: Cambios no se reflejan**
+- Reconstruye la imagen: En Easypanel → "Rebuild"
+- Limpia caché de Docker si es necesario
+
 ## 📂 Estructura del Proyecto
 
 ```
