@@ -8,7 +8,7 @@ services:
       # Build from repository
       type: github
       repository: Inmocalc/ClaudeTests
-      branch: claude/aps-train-scheduling-system-011CUrE6p4Vy7S5Yx9NugbPL
+      branch: main
       path: aps-train-system
 
     # Port mapping
