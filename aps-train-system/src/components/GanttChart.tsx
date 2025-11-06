@@ -17,12 +17,12 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   horizonDays,
   onProcessClick,
 }) => {
-  const dayWidth = 80; // pixels per day
-  const rowHeight = 60; // pixels per row
+  const dayWidth = 80; // píxeles por día
+  const rowHeight = 60; // píxeles por fila
   const chartWidth = dayWidth * horizonDays;
   const startDateObj = parseISO(startDate);
 
-  // Generate date headers
+  // Generar encabezados de fecha
   const dateHeaders = Array.from({ length: horizonDays }, (_, i) => {
     const date = addDays(startDateObj, i);
     return {
@@ -32,7 +32,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     };
   });
 
-  // Calculate position and width for a process block
+  // Calcular posición y ancho para un bloque de proceso
   const getBlockPosition = (process: ScheduledProcess) => {
     const processStart = parseISO(process.startDate);
     const processEnd = parseISO(process.endDate);
@@ -42,125 +42,125 @@ export const GanttChart: React.FC<GanttChartProps> = ({
 
     return {
       left: startOffset * dayWidth,
-      width: duration * dayWidth - 4, // -4 for padding
+      width: duration * dayWidth - 4, // -4 para padding
     };
   };
 
-  // Group processes by production line
+  // Agrupar procesos por línea de producción
   const processesByLine = productionLines.map((line) => ({
     line,
     processes: scheduledProcesses.filter((p) => p.productionLineId === line.id),
   }));
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-xl font-bold mb-4">Gantt Chart - Production Schedule</h2>
-
-      <div className="overflow-x-auto">
-        {/* Timeline header */}
-        <div className="flex mb-2" style={{ marginLeft: '200px' }}>
-          {dateHeaders.map((header, i) => (
-            <div
-              key={i}
-              className="border-r border-gray-300 text-center"
-              style={{ width: `${dayWidth}px` }}
-            >
-              <div className="text-xs font-semibold text-gray-700">
-                Day {header.day}
-              </div>
-              <div className="text-xs text-gray-500">{header.dayOfWeek}</div>
-              <div className="text-xs text-gray-400">
-                {new Date(header.date).toLocaleDateString('es-ES', {
-                  month: 'short',
-                  day: 'numeric'
-                })}
-              </div>
+    <div className="overflow-x-auto">
+      {/* Encabezado de línea temporal */}
+      <div className="flex mb-2" style={{ marginLeft: '220px' }}>
+        {dateHeaders.map((header, i) => (
+          <div
+            key={i}
+            className="border-r border-metro-blue/20 text-center bg-blue-50"
+            style={{ width: `${dayWidth}px` }}
+          >
+            <div className="text-xs font-bold text-metro-blue">
+              Día {header.day}
             </div>
-          ))}
-        </div>
-
-        {/* Production lines and processes */}
-        {processesByLine.map(({ line, processes }) => (
-          <div key={line.id} className="flex mb-1 relative">
-            {/* Line label */}
-            <div
-              className="flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-l"
-              style={{ width: '200px', height: `${rowHeight}px` }}
-            >
-              <div>
-                <div className="font-semibold text-sm">{line.processType}</div>
-                <div className="text-xs text-gray-600">
-                  Línea {line.lineNumber} ({line.workersRequired} workers)
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline grid */}
-            <div
-              className="relative border border-gray-300 rounded-r"
-              style={{ width: `${chartWidth}px`, height: `${rowHeight}px` }}
-            >
-              {/* Grid lines */}
-              {Array.from({ length: horizonDays }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute border-r border-gray-200"
-                  style={{
-                    left: `${i * dayWidth}px`,
-                    height: '100%',
-                  }}
-                />
-              ))}
-
-              {/* Process blocks */}
-              {processes.map((process, i) => {
-                const { left, width } = getBlockPosition(process);
-                return (
-                  <div
-                    key={`${process.orderId}-${process.processIndex}-${i}`}
-                    className="absolute cursor-pointer hover:opacity-90 transition-opacity rounded px-2 py-1 text-white text-xs font-semibold shadow-md"
-                    style={{
-                      left: `${left + 2}px`,
-                      top: '8px',
-                      width: `${width}px`,
-                      height: `${rowHeight - 16}px`,
-                      backgroundColor: process.color,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                    onClick={() => onProcessClick && onProcessClick(process)}
-                    title={`${process.orderId} - ${process.processName}`}
-                  >
-                    <div className="font-bold">{process.orderId}</div>
-                    <div className="text-[10px] opacity-90">
-                      {process.processName}
-                    </div>
-                    <div className="text-[10px] opacity-75">
-                      {differenceInDays(parseISO(process.endDate), parseISO(process.startDate))}d
-                    </div>
-                  </div>
-                );
+            <div className="text-xs text-gray-600 font-semibold">{header.dayOfWeek}</div>
+            <div className="text-[10px] text-gray-500">
+              {new Date(header.date).toLocaleDateString('es-ES', {
+                month: 'short',
+                day: 'numeric'
               })}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Legend */}
-      <div className="mt-4 flex gap-4 text-sm">
+      {/* Líneas de producción y procesos */}
+      {processesByLine.map(({ line, processes }) => (
+        <div key={line.id} className="flex mb-2 relative">
+          {/* Etiqueta de línea */}
+          <div
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-metro-blue to-metro-blue-light text-white border border-metro-blue rounded-l-lg shadow-sm"
+            style={{ width: '220px', height: `${rowHeight}px` }}
+          >
+            <div className="w-full">
+              <div className="font-bold text-sm">{line.processType}</div>
+              <div className="text-xs opacity-90">
+                Línea {line.lineNumber}
+              </div>
+              <div className="text-[10px] opacity-75">
+                {line.workersRequired} trabajador{line.workersRequired > 1 ? 'es' : ''}
+              </div>
+            </div>
+          </div>
+
+          {/* Cuadrícula de línea temporal */}
+          <div
+            className="relative border border-gray-300 rounded-r-lg bg-white"
+            style={{ width: `${chartWidth}px`, height: `${rowHeight}px` }}
+          >
+            {/* Líneas de cuadrícula */}
+            {Array.from({ length: horizonDays }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute border-r border-gray-200"
+                style={{
+                  left: `${i * dayWidth}px`,
+                  height: '100%',
+                  backgroundColor: i % 2 === 0 ? '#FAFAFA' : '#FFFFFF',
+                }}
+              />
+            ))}
+
+            {/* Bloques de proceso */}
+            {processes.map((process, i) => {
+              const { left, width } = getBlockPosition(process);
+              return (
+                <div
+                  key={`${process.orderId}-${process.processIndex}-${i}`}
+                  className="absolute cursor-pointer hover:opacity-90 hover:scale-105 transition-all rounded-lg px-2 py-1 text-white text-xs font-bold shadow-lg border-2 border-white"
+                  style={{
+                    left: `${left + 2}px`,
+                    top: '8px',
+                    width: `${width}px`,
+                    height: `${rowHeight - 16}px`,
+                    backgroundColor: process.color,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                  onClick={() => onProcessClick && onProcessClick(process)}
+                  title={`${process.orderId} - ${process.processName}`}
+                >
+                  <div className="font-bold text-base">{process.orderId}</div>
+                  <div className="text-[10px] opacity-90">
+                    {process.processName}
+                  </div>
+                  <div className="text-[9px] opacity-80 bg-black/20 px-1 rounded">
+                    {differenceInDays(parseISO(process.endDate), parseISO(process.startDate))} día{differenceInDays(parseISO(process.endDate), parseISO(process.startDate)) > 1 ? 's' : ''}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+      {/* Leyenda */}
+      <div className="mt-6 flex gap-6 text-sm justify-center bg-gray-50 p-4 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: '#4A90E2' }}></div>
-          <span>Model A</span>
+          <div className="w-6 h-6 rounded border-2 border-white shadow-md" style={{ backgroundColor: '#0066CC' }}></div>
+          <span className="font-semibold">Modelo A</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: '#E74C3C' }}></div>
-          <span>Model B</span>
+          <div className="w-6 h-6 rounded border-2 border-white shadow-md" style={{ backgroundColor: '#E30613' }}></div>
+          <span className="font-semibold">Modelo B</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded" style={{ backgroundColor: '#2ECC71' }}></div>
-          <span>Model C</span>
+          <div className="w-6 h-6 rounded border-2 border-white shadow-md" style={{ backgroundColor: '#2ECC71' }}></div>
+          <span className="font-semibold">Modelo C</span>
         </div>
       </div>
     </div>

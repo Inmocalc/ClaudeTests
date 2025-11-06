@@ -17,7 +17,7 @@ interface ResourceChartProps {
 }
 
 export const ResourceChart: React.FC<ResourceChartProps> = ({ resourceUsage }) => {
-  // Prepare data for the chart
+  // Preparar datos para el gráfico
   const chartData = resourceUsage.map((usage, index) => ({
     day: `D${index + 1}`,
     date: new Date(usage.date).toLocaleDateString('es-ES', {
@@ -30,36 +30,36 @@ export const ResourceChart: React.FC<ResourceChartProps> = ({ resourceUsage }) =
   }));
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-xl font-bold mb-4">Resource Usage - Workers</h2>
-
-      <ResponsiveContainer width="100%" height={300}>
+    <div>
+      <ResponsiveContainer width="100%" height={320}>
         <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
           <XAxis
             dataKey="day"
-            label={{ value: 'Days', position: 'insideBottom', offset: -5 }}
+            label={{ value: 'Días', position: 'insideBottom', offset: -5, style: { fontWeight: 'bold' } }}
+            stroke="#6B7280"
           />
           <YAxis
-            label={{ value: 'Workers', angle: -90, position: 'insideLeft' }}
+            label={{ value: 'Trabajadores', angle: -90, position: 'insideLeft', style: { fontWeight: 'bold' } }}
             domain={[0, 'auto']}
+            stroke="#6B7280"
           />
           <Tooltip
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
                 return (
-                  <div className="bg-white border border-gray-300 rounded p-2 shadow-lg">
-                    <p className="font-semibold">{data.day} ({data.date})</p>
-                    <p className="text-green-600">
-                      Available: {data.available} workers
+                  <div className="bg-white border-2 border-metro-blue rounded-lg p-3 shadow-metro">
+                    <p className="font-bold text-metro-blue mb-2">{data.day} ({data.date})</p>
+                    <p className="text-green-600 text-sm font-semibold">
+                      ✓ Disponibles: {data.available} trabajadores
                     </p>
-                    <p className="text-blue-600">
-                      Assigned: {data.assigned} workers
+                    <p className="text-blue-600 text-sm font-semibold">
+                      → Asignados: {data.assigned} trabajadores
                     </p>
                     {data.overload > 0 && (
-                      <p className="text-red-600 font-bold">
-                        Overload: +{data.overload} workers
+                      <p className="text-red-600 font-bold text-sm mt-1">
+                        ⚠ Sobrecarga: +{data.overload} trabajadores
                       </p>
                     )}
                   </div>
@@ -68,53 +68,64 @@ export const ResourceChart: React.FC<ResourceChartProps> = ({ resourceUsage }) =
               return null;
             }}
           />
-          <Legend />
+          <Legend
+            wrapperStyle={{ paddingTop: '20px' }}
+            formatter={(value) => {
+              const labels: { [key: string]: string } = {
+                available: 'Trabajadores Disponibles',
+                assigned: 'Trabajadores Asignados',
+                overload: 'Sobrecarga',
+              };
+              return <span className="font-semibold">{labels[value] || value}</span>;
+            }}
+          />
 
-          {/* Available workers line */}
+          {/* Línea de trabajadores disponibles */}
           <Line
             type="monotone"
             dataKey="available"
-            stroke="#00AA00"
-            strokeWidth={2}
-            name="Available Workers"
-            dot={{ r: 4 }}
+            stroke="#10B981"
+            strokeWidth={3}
+            name="available"
+            dot={{ r: 5, fill: '#10B981', strokeWidth: 2, stroke: '#fff' }}
+            activeDot={{ r: 7 }}
           />
 
-          {/* Assigned workers line */}
+          {/* Línea de trabajadores asignados */}
           <Line
             type="monotone"
             dataKey="assigned"
             stroke="#0066CC"
-            strokeWidth={2}
-            name="Assigned Workers"
-            dot={{ r: 4 }}
+            strokeWidth={3}
+            name="assigned"
+            dot={{ r: 5, fill: '#0066CC', strokeWidth: 2, stroke: '#fff' }}
+            activeDot={{ r: 7 }}
           />
 
-          {/* Overload area */}
+          {/* Área de sobrecarga */}
           <Area
             type="monotone"
             dataKey="overload"
-            fill="#FF0000"
+            fill="#E30613"
             fillOpacity={0.3}
-            stroke="#FF0000"
+            stroke="#E30613"
             strokeWidth={2}
-            name="Overload"
+            name="overload"
           />
         </ComposedChart>
       </ResponsiveContainer>
 
-      {/* Status indicators */}
-      <div className="mt-4 flex gap-4 text-sm">
-        {resourceUsage.some((u) => u.isOverloaded) && (
-          <div className="flex items-center gap-2 text-red-600">
-            <span className="font-bold">⚠</span>
-            <span>Resource conflicts detected</span>
+      {/* Indicadores de estado */}
+      <div className="mt-6 flex gap-4 justify-center">
+        {resourceUsage.some((u) => u.isOverloaded) ? (
+          <div className="flex items-center gap-2 bg-red-50 text-metro-red px-4 py-2 rounded-lg border-2 border-metro-red">
+            <span className="font-bold text-xl">⚠</span>
+            <span className="font-semibold">Conflictos de recursos detectados</span>
           </div>
-        )}
-        {!resourceUsage.some((u) => u.isOverloaded) && (
-          <div className="flex items-center gap-2 text-green-600">
-            <span className="font-bold">✓</span>
-            <span>All resources within capacity</span>
+        ) : (
+          <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg border-2 border-green-500">
+            <span className="font-bold text-xl">✓</span>
+            <span className="font-semibold">Todos los recursos dentro de la capacidad</span>
           </div>
         )}
       </div>

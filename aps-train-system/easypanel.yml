@@ -1,0 +1,40 @@
+# Easypanel Configuration for APS Train System
+# This file can be used as reference for manual configuration in Easypanel UI
+
+name: aps-train-system
+services:
+  - name: web
+    image:
+      # Build from repository
+      type: github
+      repository: Inmocalc/ClaudeTests
+      branch: claude/aps-train-scheduling-system-011CUrE6p4Vy7S5Yx9NugbPL
+      path: aps-train-system
+
+    # Port mapping
+    ports:
+      - published: 80
+        target: 80
+
+    # Resources
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    # Restart policy
+    restart: unless-stopped
+
+# Domain configuration (configure in Easypanel UI)
+# Set your domain or subdomain to access the application
+# Example: aps-train.yourdomain.com

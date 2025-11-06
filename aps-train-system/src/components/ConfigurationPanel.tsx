@@ -24,7 +24,7 @@ export const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
     e.preventDefault();
 
     if (!orderId.trim()) {
-      alert('Please enter an Order ID');
+      alert('Por favor, ingresa un ID de orden');
       return;
     }
 
@@ -36,101 +36,99 @@ export const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
 
     onAddOrder(newOrder);
 
-    // Reset form
+    // Reiniciar formulario
     setOrderId('');
     setShowForm(false);
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-bold mb-4">Configuration</h2>
-
-      {/* Add Order Button */}
+    <div>
+      {/* Botón Añadir Orden */}
       {!showForm && (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors mb-4"
+          className="w-full bg-gradient-to-r from-metro-blue to-metro-blue-light hover:from-metro-blue-light hover:to-metro-blue text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md hover:shadow-lg mb-4"
         >
-          + Add Order
+          <span className="text-lg">+</span> Añadir Orden de Trabajo
         </button>
       )}
 
-      {/* Add Order Form */}
+      {/* Formulario de Nueva Orden */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-          <h3 className="font-semibold mb-3">New Production Order</h3>
+        <form onSubmit={handleSubmit} className="mb-6 p-4 border-2 border-metro-blue rounded-lg bg-blue-50">
+          <h3 className="font-bold mb-3 text-metro-blue text-lg">Nueva Orden de Mantenimiento</h3>
 
-          {/* Order ID */}
+          {/* ID de Orden */}
           <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Order ID
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              ID de Orden
             </label>
             <input
               type="text"
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
-              placeholder="e.g., A3, B3, C2"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="ej: A3, B3, C2"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-metro-blue focus:border-metro-blue"
               required
             />
           </div>
 
-          {/* Model Selection */}
+          {/* Selección de Modelo */}
           <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Train Model
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Modelo de Tren
             </label>
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value as 'A' | 'B' | 'C')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-metro-blue focus:border-metro-blue font-semibold"
             >
               {trainModels.map((model) => (
                 <option key={model.id} value={model.id}>
-                  Model {model.id} - {model.description}
+                  Modelo {model.id} - {model.description}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Due Date */}
+          {/* Fecha de Entrega */}
           <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due Date
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Fecha de Entrega
             </label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-metro-blue focus:border-metro-blue"
               required
             />
           </div>
 
-          {/* Process Info */}
-          <div className="mb-3 p-2 bg-blue-50 rounded text-xs">
-            <strong>Model {selectedModel} process times:</strong>
-            <ul className="mt-1 ml-4 list-disc">
+          {/* Información del Proceso */}
+          <div className="mb-3 p-3 bg-white border-2 border-metro-blue rounded-lg text-xs">
+            <strong className="text-metro-blue">Tiempos del Modelo {selectedModel}:</strong>
+            <ul className="mt-2 ml-4 list-disc text-gray-700">
               {trainModels
                 .find((m) => m.id === selectedModel)
                 ?.processes.map((p) => (
-                  <li key={p.name}>
-                    {p.name}: {p.durationDays} day(s)
+                  <li key={p.name} className="mb-1">
+                    <strong>{p.name}:</strong> {p.durationDays} día{p.durationDays > 1 ? 's' : ''}
                   </li>
                 ))}
             </ul>
-            <div className="mt-1 font-semibold">
-              Total duration: {trainModels.find((m) => m.id === selectedModel)?.totalDurationDays} days
+            <div className="mt-2 font-bold text-metro-blue">
+              Duración total: {trainModels.find((m) => m.id === selectedModel)?.totalDurationDays} días
             </div>
           </div>
 
-          {/* Buttons */}
+          {/* Botones */}
           <div className="flex gap-2">
             <button
               type="submit"
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-colors"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md"
             >
-              Add Order
+              ✓ Crear Orden
             </button>
             <button
               type="button"
@@ -138,52 +136,73 @@ export const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                 setShowForm(false);
                 setOrderId('');
               }}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md transition-colors"
+              className="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md"
             >
-              Cancel
+              ✕ Cancelar
             </button>
           </div>
         </form>
       )}
 
-      {/* System Info */}
-      <div className="mt-6 p-3 bg-gray-50 rounded-lg text-sm">
-        <h3 className="font-semibold mb-2">System Information</h3>
+      {/* Información del Sistema */}
+      <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-white rounded-lg border-2 border-gray-200 text-sm">
+        <h3 className="font-bold mb-3 text-metro-blue flex items-center gap-2">
+          <span>ℹ️</span> Información del Sistema
+        </h3>
 
-        <div className="space-y-1 text-xs text-gray-600">
-          <div>
-            <strong>Start Date:</strong> {new Date(startDate).toLocaleDateString('es-ES')}
+        <div className="space-y-2 text-xs">
+          <div className="flex justify-between">
+            <span className="font-semibold text-gray-700">Fecha de Inicio:</span>
+            <span className="text-metro-blue font-bold">{new Date(startDate).toLocaleDateString('es-ES')}</span>
           </div>
-          <div>
-            <strong>Planning Horizon:</strong> 10 days
+          <div className="flex justify-between">
+            <span className="font-semibold text-gray-700">Horizonte de Planificación:</span>
+            <span className="text-metro-blue font-bold">10 días</span>
           </div>
-          <div>
-            <strong>Total Workers:</strong> 5 (variable availability)
+          <div className="flex justify-between">
+            <span className="font-semibold text-gray-700">Personal Total:</span>
+            <span className="text-metro-blue font-bold">5 trabajadores</span>
           </div>
         </div>
 
-        <div className="mt-3">
-          <strong className="text-xs">Production Lines:</strong>
-          <ul className="mt-1 text-xs text-gray-600 space-y-1">
-            <li>• Preparación: 2 lines (2 workers each)</li>
-            <li>• Torneado: 1 line (1 worker)</li>
-            <li>• Pintado: 1 line (1 worker)</li>
+        <div className="mt-4 pt-3 border-t-2 border-gray-200">
+          <strong className="text-xs font-bold text-metro-blue">Líneas de Producción:</strong>
+          <ul className="mt-2 text-xs space-y-1">
+            <li className="flex items-start gap-2">
+              <span className="text-metro-blue">→</span>
+              <span><strong>Preparación:</strong> 2 líneas (2 trabajadores c/u)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-metro-blue">→</span>
+              <span><strong>Torneado:</strong> 1 línea (1 trabajador)</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-metro-blue">→</span>
+              <span><strong>Pintado:</strong> 1 línea (1 trabajador)</span>
+            </li>
           </ul>
         </div>
       </div>
 
-      {/* Model Reference */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-        <h3 className="font-semibold mb-2">Train Models</h3>
+      {/* Referencia de Modelos */}
+      <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-white rounded-lg border-2 border-gray-200 text-sm">
+        <h3 className="font-bold mb-3 text-metro-blue flex items-center gap-2">
+          <span>🚊</span> Modelos de Tren
+        </h3>
         <div className="space-y-2">
           {trainModels.map((model) => (
-            <div key={model.id} className="flex items-center gap-2">
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: model.color }}
-              ></div>
-              <span className="text-xs">
-                <strong>Model {model.id}:</strong> {model.totalDurationDays} days total
+            <div key={model.id} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-6 h-6 rounded border-2 border-white shadow-md"
+                  style={{ backgroundColor: model.color }}
+                ></div>
+                <span className="text-xs font-bold">
+                  Modelo {model.id}
+                </span>
+              </div>
+              <span className="text-xs text-gray-600">
+                {model.totalDurationDays} días
               </span>
             </div>
           ))}
