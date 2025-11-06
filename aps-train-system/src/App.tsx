@@ -55,6 +55,66 @@ function App() {
     console.log('Orden seleccionada:', order);
   };
 
+  const handleProcessDrag = (process: ScheduledProcess, newStartDate: string) => {
+    if (!schedule) return;
+
+    // Crear copia del schedule actual
+    let updatedProcesses: ScheduledProcess[] = [...schedule.scheduledProcesses];
+
+    // Primera pasada: actualizar el proceso arrastrado
+    updatedProcesses = updatedProcesses.map((p): ScheduledProcess => {
+      if (p.orderId === process.orderId && p.processIndex === process.processIndex) {
+        const model = trainModels.find((m) => m.id === process.modelType);
+        if (!model) return p;
+
+        const processDef = model.processes[process.processIndex];
+        const endDate = new Date(newStartDate);
+        endDate.setDate(endDate.getDate() + processDef.durationDays);
+
+        return {
+          ...p,
+          startDate: newStartDate,
+          endDate: endDate.toISOString().split('T')[0],
+        };
+      }
+      return p;
+    });
+
+    // Segunda pasada: recalcular procesos posteriores
+    updatedProcesses = updatedProcesses.map((p): ScheduledProcess => {
+      if (p.orderId === process.orderId && p.processIndex > process.processIndex) {
+        const model = trainModels.find((m) => m.id === p.modelType);
+        if (!model) return p;
+
+        // Encontrar el proceso anterior
+        const previousProcess = updatedProcesses.find(
+          (prev: ScheduledProcess) =>
+            prev.orderId === p.orderId && prev.processIndex === p.processIndex - 1
+        );
+
+        if (previousProcess) {
+          const processDef = model.processes[p.processIndex];
+          const startDateStr: string = previousProcess.endDate;
+          const endDate = new Date(startDateStr);
+          endDate.setDate(endDate.getDate() + processDef.durationDays);
+
+          return {
+            ...p,
+            startDate: startDateStr,
+            endDate: endDate.toISOString().split('T')[0],
+          };
+        }
+      }
+      return p;
+    });
+
+    // Actualizar el schedule con los procesos modificados
+    setSchedule({
+      ...schedule,
+      scheduledProcesses: updatedProcesses,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-metro-gray-light">
       {/* Cabecera */}
@@ -176,6 +236,7 @@ function App() {
                     startDate={defaultConfiguration.startDate}
                     horizonDays={defaultConfiguration.horizonDays}
                     onProcessClick={handleProcessClick}
+                    onProcessDrag={handleProcessDrag}
                   />
                 ) : (
                   <div className="text-center text-gray-500 py-12">
