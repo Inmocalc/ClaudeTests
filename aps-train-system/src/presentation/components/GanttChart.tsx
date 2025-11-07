@@ -1,6 +1,6 @@
 import React from 'react';
 import { parseISO, addDays, differenceInDays, formatISO } from 'date-fns';
-import type { ScheduledProcess, ProductionLine } from '../types/interfaces';
+import type { ScheduledProcess, ProductionLine } from '../../types/interfaces';
 
 interface GanttChartProps {
   scheduledProcesses: ScheduledProcess[];

@@ -16,6 +16,11 @@ export interface ConfigureLineInput {
 }
 
 /**
+ * Alias for adding a new line
+ */
+export type AddLineInput = Omit<ConfigureLineInput, 'id'>;
+
+/**
  * Output from configuring a line
  */
 export interface ConfigureLineOutput {

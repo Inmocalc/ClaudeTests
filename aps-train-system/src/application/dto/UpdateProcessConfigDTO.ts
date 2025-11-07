@@ -4,6 +4,9 @@
 
 import type { ProcessConfigData } from '../../domain/entities/ProcessConfig';
 
+// Re-export ProcessConfigData for convenience
+export type { ProcessConfigData };
+
 /**
  * Input for updating process configuration for a model
  */
