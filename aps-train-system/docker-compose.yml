@@ -1,6 +1,84 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: aps-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aps_user
+      POSTGRES_PASSWORD: aps_password
+      POSTGRES_DB: aps_train_system
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aps_user -d aps_train_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aps-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aps-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aps-network
+
+  # Redis Commander (Optional - Web UI for Redis)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: aps-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - aps-network
+    profiles:
+      - tools
+
+  # pgAdmin (Optional - Web UI for PostgreSQL)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: aps-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@aps.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - aps-network
+    profiles:
+      - tools
+
+  # Application (optional - for production deployment)
   aps-train-system:
     build:
       context: .
@@ -10,6 +88,15 @@ services:
     ports:
       - "3000:80"
     restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://aps_user:aps_password@postgres:5432/aps_train_system
+      REDIS_URL: redis://redis:6379
+      PERSISTENCE_MODE: redis-postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
@@ -18,3 +105,19 @@ services:
       start_period: 40s
     labels:
       - "com.docker.compose.project=aps-train-system"
+    networks:
+      - aps-network
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  aps-network:
+    driver: bridge
