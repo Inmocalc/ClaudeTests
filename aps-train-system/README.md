@@ -20,6 +20,36 @@ Este sistema implementa un motor de programación avanzada (APS) para la fabrica
 - 🎯 **Validación de Restricciones** en tiempo real
 - 🔄 **Replanificación Automática** al agregar/eliminar órdenes
 
+## 🚀 Inicio Rápido (Instaladores Automáticos)
+
+### Instalación Local en 3 Comandos ⚡
+
+```bash
+cd aps-train-system
+chmod +x install.sh
+./install.sh
+```
+
+El instalador te guiará paso a paso y configurará todo automáticamente. En menos de 5 minutos tendrás el sistema corriendo en http://localhost:3000
+
+### Instalación en Easypanel (Producción) 🌐
+
+```bash
+node install-easypanel.js
+# Responde las preguntas
+# Sigue la guía generada en EASYPANEL_INSTALL.md
+```
+
+El generador crea una guía personalizada con todos los comandos exactos para desplegar en Easypanel.
+
+### 📚 Documentación Completa de Instaladores
+
+Para más detalles sobre los instaladores automáticos, consulta:
+
+**→ [docs/INSTALADORES.md](docs/INSTALADORES.md)** - Guía completa de uso de instaladores
+
+---
+
 ## 🏗️ Arquitectura del Sistema
 
 ### Modelos de Datos
