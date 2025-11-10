@@ -78,27 +78,52 @@ services:
     profiles:
       - tools
 
-  # Application (optional - for production deployment)
-  aps-train-system:
+  # Backend API
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: aps-train-system:latest
-    container_name: aps-train-system
+      dockerfile: Dockerfile.backend
+    image: aps-backend:latest
+    container_name: aps-backend
     ports:
-      - "3000:80"
+      - "3001:3001"
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://aps_user:aps_password@postgres:5432/aps_train_system
       REDIS_URL: redis://redis:6379
-      PERSISTENCE_MODE: redis-postgres
+      PERSISTENCE_MODE: hybrid
+      NODE_ENV: production
+      PORT: 3001
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - aps-network
+
+  # Frontend Application
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aps-frontend:latest
+    container_name: aps-frontend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://backend:3001/api
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3

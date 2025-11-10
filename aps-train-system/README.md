@@ -62,13 +62,54 @@ Este sistema implementa un motor de programación avanzada (APS) para la fabrica
 4. Detectar conflictos (entregas tardías, recursos insuficientes)
 ```
 
+## 🏗️ Arquitectura Técnica (Hexagonal / Clean Architecture)
+
+### Capas del Sistema
+
+```
+📁 Domain Layer (Núcleo del negocio)
+  ├── entities/          # Entidades de dominio (ProductionOrder, OperationType, etc.)
+  ├── repositories/      # Interfaces de repositorios (puertos)
+  └── services/          # Servicios de dominio (SchedulingService, ValidationService)
+
+📁 Application Layer (Casos de uso)
+  ├── usecases/          # Use Cases (ScheduleOrders, ManageOperations, etc.)
+  └── dto/               # Data Transfer Objects
+
+📁 Infrastructure Layer (Adaptadores)
+  └── persistence/       # Implementaciones de repositorios
+      ├── memory/        # In-memory (desarrollo)
+      ├── redis/         # Redis para configuración
+      └── postgres/      # PostgreSQL para órdenes
+
+📁 Presentation Layer (UI)
+  ├── components/        # Componentes React
+  ├── hooks/            # Custom hooks (useOperations, useScheduling)
+  └── services/         # API Client (HTTP)
+
+📁 Backend API (Express)
+  └── routes/           # REST endpoints
+```
+
+### Persistencia
+
+El sistema soporta **4 modos de persistencia**:
+
+| Modo | Configuración | Órdenes | Uso |
+|------|---------------|---------|-----|
+| `memory` | En memoria | En memoria | Desarrollo/Testing |
+| `redis` | Redis | En memoria | No recomendado |
+| `postgres` | En memoria | PostgreSQL | Parcial |
+| `hybrid` | Redis | PostgreSQL | ✅ **Producción** |
+
 ## 🚀 Instalación y Uso
 
 ### Requisitos Previos
 - Node.js >= 18.x
 - npm >= 9.x
+- Docker & Docker Compose (opcional, para persistencia)
 
-### Instalación
+### Opción 1: Desarrollo Rápido (In-Memory)
 
 ```bash
 # Clonar repositorio
@@ -78,144 +119,137 @@ cd aps-train-system
 # Instalar dependencias
 npm install
 
-# Iniciar servidor de desarrollo
-npm run dev
+# Iniciar frontend y backend simultáneamente
+npm run dev:all
 
-# Construir para producción
-npm run build
+# Frontend: http://localhost:5173
+# Backend API: http://localhost:3001
+```
 
-# Previsualizar build de producción
-npm run preview
+### Opción 2: Con Persistencia (Docker Compose) - ⭐ Recomendado
+
+```bash
+# 1. Iniciar PostgreSQL y Redis
+docker-compose up -d postgres redis
+
+# 2. Iniciar frontend y backend
+npm run dev:all
+
+# Los datos ahora persisten en PostgreSQL y Redis
+```
+
+### Opción 3: Producción Local (Todo con Docker)
+
+```bash
+# Levantar TODOS los servicios (PostgreSQL, Redis, Backend, Frontend)
+docker-compose --profile production up -d
+
+# Acceder a http://localhost:3000
 ```
 
 ### Scripts Disponibles
 
-- `npm run dev` - Inicia servidor de desarrollo en http://localhost:5173
-- `npm run build` - Construye aplicación optimizada para producción
-- `npm run preview` - Previsualiza build de producción
+- `npm run dev` - Inicia solo frontend (Vite) en http://localhost:5173
+- `npm run dev:backend` - Inicia solo backend API en http://localhost:3001
+- `npm run dev:all` - Inicia frontend + backend simultáneamente
+- `npm run build` - Construye frontend para producción
+- `npm run build:backend` - Compila backend con TypeScript
+- `npm run start:backend` - Ejecuta backend compilado
 - `npm run lint` - Ejecuta linter de código
 
 ## 🐳 Despliegue con Docker
 
-### Opción 1: Docker Compose (Recomendado)
+### Solución "Llave en Mano" con Docker Compose ⭐
+
+**La forma más fácil de desplegar todo el sistema**. Un solo comando levanta los 4 servicios:
 
 ```bash
-# Clonar repositorio
-git clone <repository-url>
-cd aps-train-system
+# Levantar PostgreSQL, Redis, Backend API y Frontend
+docker-compose --profile production up -d
 
-# Construir y ejecutar con Docker Compose
-docker-compose up -d
-
-# La aplicación estará disponible en http://localhost:3000
+# Acceder a:
+# - Frontend: http://localhost:3000
+# - Backend API: http://localhost:3001
+# - PostgreSQL: localhost:5432
+# - Redis: localhost:6379
 ```
 
-### Opción 2: Docker Manual
+### Con herramientas de administración
 
 ```bash
-# Construir imagen
-docker build -t aps-train-system:latest .
+# Incluye pgAdmin y Redis Commander
+docker-compose --profile tools --profile production up -d
 
-# Ejecutar contenedor
-docker run -d -p 3000:80 --name aps-train-system aps-train-system:latest
+# Acceder además a:
+# - pgAdmin: http://localhost:8080 (admin@aps.local / admin)
+# - Redis Commander: http://localhost:8081
+```
 
+### Comandos útiles
+
+```bash
 # Ver logs
-docker logs -f aps-train-system
+docker-compose logs -f backend
 
-# Detener contenedor
-docker stop aps-train-system
+# Reiniciar solo un servicio
+docker-compose restart backend
 
-# Eliminar contenedor
-docker rm aps-train-system
-```
+# Detener todo
+docker-compose down
 
-### Health Check
-
-El contenedor incluye un endpoint de health check en `/health` que puede usarse para monitoreo:
-
-```bash
-curl http://localhost:3000/health
-# Respuesta: healthy
+# Reconstruir y reiniciar
+docker-compose up -d --build
 ```
 
 ## 🚀 Despliegue en Easypanel
 
-### Método 1: Desde GitHub (Recomendado)
+### ⚠️ Importante: Despliegue Completo con Persistencia
 
-1. **Acceder a Easypanel**
-   - Inicia sesión en tu instancia de Easypanel
+Para que el sistema funcione con persistencia (Fase 5), necesitas desplegar **4 servicios separados** en Easypanel:
 
-2. **Crear Nueva Aplicación**
-   - Click en "Create" → "App"
-   - Selecciona "GitHub" como fuente
+1. **PostgreSQL** - Base de datos para órdenes
+2. **Redis** - Caché para configuración
+3. **Backend API** - Servidor Express
+4. **Frontend** - Aplicación React
 
-3. **Configurar Repositorio**
-   - Repository: `Inmocalc/ClaudeTests`
-   - Branch: `claude/aps-train-scheduling-system-011CUrE6p4Vy7S5Yx9NugbPL`
-   - Build Path: `/aps-train-system`
+### 📖 Guía Completa de Despliegue
 
-4. **Configurar Build**
-   - Build Method: `Dockerfile`
-   - Dockerfile Path: `Dockerfile`
-   - Port: `80`
+Consulta la guía detallada paso a paso en:
 
-5. **Configurar Dominio**
-   - Agrega tu dominio personalizado o usa el subdominio proporcionado
-   - Ejemplo: `aps-train.tudominio.com`
+**[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**
 
-6. **Deploy**
-   - Click en "Deploy"
-   - Espera a que el build termine (2-3 minutos)
+Esta guía incluye:
+- ✅ Configuración de cada servicio en Easypanel
+- ✅ Variables de entorno necesarias
+- ✅ Inicialización de base de datos
+- ✅ Verificación del despliegue
+- ✅ Solución de problemas comunes
 
-### Método 2: Desde Docker Hub
-
-Si prefieres usar una imagen pre-construida:
+### Resumen Rápido
 
 ```bash
-# En tu servidor, construye la imagen
-cd aps-train-system
-docker build -t tu-usuario/aps-train-system:latest .
-docker push tu-usuario/aps-train-system:latest
+# Paso 1: Crear servicio PostgreSQL
+Database Name: aps_train_system
+Username: aps_user
+Password: [tu-contraseña-segura]
+
+# Paso 2: Crear servicio Redis
+Port: 6379
+
+# Paso 3: Crear Backend API
+Dockerfile: Dockerfile.backend
+Port: 3001
+Env: DATABASE_URL, REDIS_URL, PERSISTENCE_MODE=hybrid
+
+# Paso 4: Crear Frontend
+Dockerfile: Dockerfile
+Port: 80
+Env: VITE_API_URL=[url-del-backend]/api
 ```
-
-Luego en Easypanel:
-1. Crear App → Docker Image
-2. Image: `tu-usuario/aps-train-system:latest`
-3. Port: `80`
-4. Deploy
-
-### Configuración de Recursos Recomendada
-
-- **CPU**: 0.5 cores
-- **Memoria**: 512 MB (mínimo 256 MB)
-- **Storage**: 1 GB
-
-### Variables de Entorno (Opcional)
-
-No se requieren variables de entorno para el funcionamiento básico. La aplicación es completamente estática.
-
-### SSL/HTTPS
-
-Easypanel configura automáticamente SSL con Let's Encrypt. Solo necesitas:
-1. Configurar tu dominio apuntando a tu VPS
-2. Agregar el dominio en Easypanel
-3. Habilitar "Auto SSL"
 
 ### Troubleshooting
 
-**Problema: La aplicación no inicia**
-```bash
-# Verificar logs en Easypanel o vía SSH
-docker logs <container-name>
-```
-
-**Problema: Error 502 Bad Gateway**
-- Verifica que el puerto 80 esté expuesto correctamente
-- Revisa que el contenedor esté corriendo: `docker ps`
-
-**Problema: Cambios no se reflejan**
-- Reconstruye la imagen: En Easypanel → "Rebuild"
-- Limpia caché de Docker si es necesario
+Consulta la sección de "Solución de Problemas" en [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ## 📂 Estructura del Proyecto
 
@@ -304,12 +338,27 @@ El sistema valida:
 
 ## 🛠️ Tecnologías Utilizadas
 
-- **Frontend Framework**: React 18.3 con TypeScript 5.6
-- **Build Tool**: Vite 7.2
-- **Estilos**: Tailwind CSS 4.0
-- **Gráficos**: Recharts 2.x
+### Frontend
+- **Framework**: React 19.1 con TypeScript 5.9
+- **Build Tool**: Vite 7.1
+- **Estilos**: Tailwind CSS 4.1
+- **Gráficos**: Recharts 3.3
+- **Routing**: React Router DOM 7.9
 - **Utilidades**: date-fns 4.1
-- **Type Safety**: TypeScript con strict mode
+
+### Backend
+- **Runtime**: Node.js 18+
+- **Framework**: Express 5.1
+- **Persistencia**:
+  - PostgreSQL (pg 8.16) - Órdenes de producción
+  - Redis (ioredis 5.8) - Configuración del sistema
+- **Utilidades**: CORS, dotenv
+
+### Infraestructura
+- **Containerización**: Docker & Docker Compose
+- **Base de datos**: PostgreSQL 15
+- **Caché**: Redis 7
+- **Servidor Web**: Nginx (producción)
 
 ## 🔮 Extensibilidad Futura
 
