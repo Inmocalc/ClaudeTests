@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ProductionOrder, TrainModel } from '../types/interfaces';
+import type { ProductionOrder, TrainModel } from '../../types/interfaces';
 import { formatISO, addDays, parseISO } from 'date-fns';
 
 interface ConfigurationPanelProps {
@@ -111,7 +111,7 @@ export const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
             <ul className="mt-2 ml-4 list-disc text-gray-700">
               {trainModels
                 .find((m) => m.id === selectedModel)
-                ?.processes.map((p) => (
+                ?.processes.map((p: { name: string; durationDays: number }) => (
                   <li key={p.name} className="mb-1">
                     <strong>{p.name}:</strong> {p.durationDays} día{p.durationDays > 1 ? 's' : ''}
                   </li>

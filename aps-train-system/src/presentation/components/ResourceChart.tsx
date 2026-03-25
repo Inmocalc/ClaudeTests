@@ -10,7 +10,7 @@ import {
   Area,
   ComposedChart,
 } from 'recharts';
-import type { DailyResourceUsage } from '../types/interfaces';
+import type { DailyResourceUsage } from '../../types/interfaces';
 
 interface ResourceChartProps {
   resourceUsage: DailyResourceUsage[];

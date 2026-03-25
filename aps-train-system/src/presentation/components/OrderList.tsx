@@ -1,6 +1,6 @@
 import React from 'react';
 import { parseISO } from 'date-fns';
-import type { ProductionOrder, TrainModel } from '../types/interfaces';
+import type { ProductionOrder, TrainModel } from '../../types/interfaces';
 
 interface OrderListProps {
   orders: ProductionOrder[];
